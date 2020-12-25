@@ -16,7 +16,10 @@ import (
 func TestWebsocketSetReadDeadline(t *testing.T) {
 	at := assert.New(t)
 
-	tran := &Transport{}
+	tran := &Transport{
+		ReadBufferSize:  1024,
+		WriteBufferSize: 1024,
+	}
 	conn := make(chan base.Conn, 1)
 	handler := func(w http.ResponseWriter, r *http.Request) {
 		c, err := tran.Accept(w, r)

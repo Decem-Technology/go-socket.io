@@ -26,7 +26,10 @@ var tests = []struct {
 func TestWebsocket(t *testing.T) {
 	at := assert.New(t)
 
-	tran := &Transport{}
+	tran := &Transport{
+		ReadBufferSize:  1024,
+		WriteBufferSize: 1024,
+	}
 	at.Equal("websocket", tran.Name())
 	conn := make(chan base.Conn, 1)
 	handler := func(w http.ResponseWriter, r *http.Request) {

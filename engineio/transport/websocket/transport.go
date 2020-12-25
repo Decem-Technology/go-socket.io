@@ -32,7 +32,10 @@ type Transport struct {
 }
 
 // Default is default transport.
-var Default = &Transport{}
+var Default = &Transport{
+	ReadBufferSize:  1024,
+	WriteBufferSize: 1024,
+}
 
 // Name is the name of websocket transport.
 func (t *Transport) Name() string {
