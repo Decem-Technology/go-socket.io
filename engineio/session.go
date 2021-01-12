@@ -1,6 +1,7 @@
 package engineio
 
 import (
+	"encoding/json"
 	"io"
 	"net"
 	"net/http"
@@ -8,9 +9,11 @@ import (
 	"sync"
 	"time"
 
+	"github.com/Decem-Technology/service-helper/bootstrap"
 	"github.com/googollee/go-socket.io/engineio/base"
 	"github.com/googollee/go-socket.io/engineio/payload"
 	"github.com/googollee/go-socket.io/engineio/transport"
+	"github.com/micro/go-micro/v2/util/log"
 )
 
 type session struct {
@@ -22,6 +25,7 @@ type session struct {
 	upgradeLocker sync.RWMutex
 	transport     string
 	conn          base.Conn
+	redis         bootstrap.RedisDB
 }
 
 func newSession(m *manager, t string, conn base.Conn, params base.ConnParameters) (*session, error) {
@@ -39,6 +43,12 @@ func newSession(m *manager, t string, conn base.Conn, params base.ConnParameters
 	}
 
 	m.Add(ses)
+
+	j, _ := json.Marshal(ses)
+	rdPub := new(bootstrap.RedisDB).DB().Publish("socket_add_client_session", string(j))
+	if err := rdPub.Err(); err != nil {
+		log.Error("register client error: ", err)
+	}
 
 	return ses, nil
 }
@@ -66,6 +76,10 @@ func (s *session) Close() error {
 	defer s.upgradeLocker.RUnlock()
 	s.closeOnce.Do(func() {
 		s.manager.Remove(s.params.SID)
+		rdPub := s.redis.DB().Publish("socket_remove_client_session", s.params.SID)
+		if err := rdPub.Err(); err != nil {
+			log.Error("remove client error: ", err)
+		}
 	})
 	return s.conn.Close()
 }
