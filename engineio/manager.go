@@ -1,11 +1,8 @@
 package engineio
 
 import (
-	"encoding/json"
 	"math/rand"
 	"sync"
-
-	"github.com/Decem-Technology/service-helper/bootstrap"
 )
 
 // SessionIDGenerator generates new session id. Default behavior is simple
@@ -88,34 +85,4 @@ func (m *manager) Count() int {
 	defer m.locker.Unlock()
 
 	return len(m.s)
-}
-
-func SubAddClient() {
-	mgr := manager{}
-	// subscribe to all channels
-	pubsub := new(bootstrap.RedisDB).DB().PSubscribe("socket_add_client_session")
-	if _, err := pubsub.Receive(); err != nil {
-		panic(err)
-	}
-	ch := pubsub.Channel()
-	for msg := range ch {
-		ses := session{}
-		if err := json.Unmarshal([]byte(msg.Payload), &ses); err != nil {
-			panic("add client error " + err.Error())
-		}
-		mgr.Add(&ses)
-	}
-}
-
-func SubRemoveClient() {
-	mgr := manager{}
-	// subscribe to all channels
-	pubsub := new(bootstrap.RedisDB).DB().PSubscribe("socket_remove_client_session")
-	if _, err := pubsub.Receive(); err != nil {
-		panic(err)
-	}
-	ch := pubsub.Channel()
-	for msg := range ch {
-		mgr.Remove(msg.Payload)
-	}
 }

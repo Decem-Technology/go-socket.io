@@ -1,6 +1,7 @@
 package engineio
 
 import (
+	"encoding/json"
 	"io"
 	"net/http"
 	"sync"
@@ -8,6 +9,7 @@ import (
 
 	websocket2 "github.com/gorilla/websocket"
 
+	"github.com/Decem-Technology/service-helper/bootstrap"
 	"github.com/googollee/go-socket.io/engineio/base"
 	"github.com/googollee/go-socket.io/engineio/transport"
 	"github.com/googollee/go-socket.io/engineio/transport/polling"
@@ -87,18 +89,49 @@ type Server struct {
 	closeOnce      sync.Once
 }
 
+var sessionMgr *manager
+
 // NewServer returns a server.
 func NewServer(opts *Options) (*Server, error) {
 	t := transport.NewManager(opts.getTransport())
+	sessionMgr = newManager(opts.getSessionIDGenerator())
 	return &Server{
 		transports:     t,
 		pingInterval:   opts.getPingInterval(),
 		pingTimeout:    opts.getPingTimeout(),
 		requestChecker: opts.getRequestChecker(),
 		connInitor:     opts.getConnInitor(),
-		sessions:       newManager(opts.getSessionIDGenerator()),
+		sessions:       sessionMgr,
 		connChan:       make(chan Conn, 1),
 	}, nil
+}
+
+func SubAddClient() {
+	// subscribe to all channels
+	pubsub := new(bootstrap.RedisDB).DB().PSubscribe("socket_add_client_session")
+	if _, err := pubsub.Receive(); err != nil {
+		panic(err)
+	}
+	ch := pubsub.Channel()
+	for msg := range ch {
+		ses := session{}
+		if err := json.Unmarshal([]byte(msg.Payload), &ses); err != nil {
+			panic("add client error " + err.Error())
+		}
+		sessionMgr.Add(&ses)
+	}
+}
+
+func SubRemoveClient() {
+	// subscribe to all channels
+	pubsub := new(bootstrap.RedisDB).DB().PSubscribe("socket_remove_client_session")
+	if _, err := pubsub.Receive(); err != nil {
+		panic(err)
+	}
+	ch := pubsub.Channel()
+	for msg := range ch {
+		sessionMgr.Remove(msg.Payload)
+	}
 }
 
 // Close closes server.
