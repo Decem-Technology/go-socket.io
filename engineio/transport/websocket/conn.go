@@ -1,7 +1,6 @@
 package websocket
 
 import (
-	"fmt"
 	"net"
 	"net/http"
 	"net/url"
@@ -27,7 +26,7 @@ type conn struct {
 func newConn(ws *websocket.Conn, url url.URL, header http.Header) base.Conn {
 	w := newWrapper(ws)
 	closed := make(chan struct{})
-	fmt.Println("x4 newConn to ws:", url, header, w, closed, packet.NewDecoder(w), packet.NewEncoder(w), "\n")
+	//fmt.Println("x4 newConn to ws:", url, header, w, closed, packet.NewDecoder(w), packet.NewEncoder(w), "\n")
 	return &conn{
 		url:          url,
 		remoteHeader: header,

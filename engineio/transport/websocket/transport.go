@@ -2,7 +2,6 @@ package websocket
 
 import (
 	"crypto/tls"
-	"fmt"
 	"net"
 	"net/http"
 	"net/url"
@@ -51,7 +50,7 @@ func (t *Transport) Dial(u *url.URL, requestHeader http.Header) (base.Conn, erro
 		NetDial:          t.NetDial,
 		Proxy:            t.Proxy,
 		TLSClientConfig:  t.TLSClientConfig,
-		HandshakeTimeout: t.HandshakeTimeout,
+		HandshakeTimeout: 120 * time.Second,
 		Subprotocols:     t.Subprotocols,
 	}
 	switch u.Scheme {
@@ -86,6 +85,6 @@ func (t *Transport) Accept(w http.ResponseWriter, r *http.Request) (base.Conn, e
 	if err != nil {
 		return nil, err
 	}
-	fmt.Println("x2 Transport Accept r", *r, "\n\n")
+	//fmt.Println("x2 Transport Accept r", *r, "\n\n")
 	return newConn(c, *r.URL, r.Header), nil
 }
