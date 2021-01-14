@@ -1,6 +1,7 @@
 package socketio
 
 import (
+	"fmt"
 	"net/http"
 
 	engineio "github.com/googollee/go-socket.io/engineio"
@@ -153,6 +154,7 @@ func (s *Server) ForEach(namespace string, room string, f EachFunc) bool {
 }
 
 func (s *Server) serveConn(c engineio.Conn) {
+	fmt.Println("x3", c, , "\n")
 	_, err := newConn(c, s.handlers)
 	if err != nil {
 		root := s.handlers[""]

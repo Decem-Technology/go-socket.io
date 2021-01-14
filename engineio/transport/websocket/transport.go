@@ -2,6 +2,7 @@ package websocket
 
 import (
 	"crypto/tls"
+	"fmt"
 	"net"
 	"net/http"
 	"net/url"
@@ -33,8 +34,8 @@ type Transport struct {
 
 // Default is default transport.
 var Default = &Transport{
-	ReadBufferSize:  1024,
-	WriteBufferSize: 1024,
+	ReadBufferSize:  4096,
+	WriteBufferSize: 4096,
 }
 
 // Name is the name of websocket transport.
@@ -85,6 +86,6 @@ func (t *Transport) Accept(w http.ResponseWriter, r *http.Request) (base.Conn, e
 	if err != nil {
 		return nil, err
 	}
-
+	fmt.Println("x2 Transport websocket", c, *r, r.Header, "\n")
 	return newConn(c, *r.URL, r.Header), nil
 }
