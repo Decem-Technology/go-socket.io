@@ -86,6 +86,6 @@ func (t *Transport) Accept(w http.ResponseWriter, r *http.Request) (base.Conn, e
 	if err != nil {
 		return nil, err
 	}
-	fmt.Println("x2 Transport websocket", c, *r, r.Header, "\n")
+	fmt.Println("x2 Transport Accept r", *r, "\n\n")
 	return newConn(c, *r.URL, r.Header), nil
 }
