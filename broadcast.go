@@ -98,7 +98,7 @@ func (broadcast *broadcast) Send(room, event string, args ...interface{}) {
 	// iterate through each connection in the room
 	for _, connection := range broadcast.rooms[room] {
 		// emit the event to the connection
-		connection.Emit(event, args...)
+		go connection.Emit(event, args...)
 	}
 }
 
@@ -113,7 +113,7 @@ func (broadcast *broadcast) SendAll(event string, args ...interface{}) {
 		// iterate through each connection in the room
 		for _, connection := range connections {
 			// emit the event to the connection
-			connection.Emit(event, args...)
+			go connection.Emit(event, args...)
 		}
 	}
 }
